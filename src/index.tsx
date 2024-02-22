@@ -19,4 +19,4 @@ else
 //
 //
 
-import 'solid-devtools'
+// import 'solid-devtools'
