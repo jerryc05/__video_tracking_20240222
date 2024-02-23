@@ -4,6 +4,12 @@ import sampleVideo from '/1.mp4'
 import { Button } from './components/ui/button'
 import { Input } from './components/ui/input'
 import { Card, CardHeader, CardTitle, CardContent } from './components/ui/card'
+import { VidPath, api_upload_config } from './api'
+import {
+  RadioGroup,
+  RadioGroupItem,
+  RadioGroupItemLabel,
+} from './components/ui/radio-group'
 
 export const App = () => {
   return (
@@ -14,18 +20,61 @@ export const App = () => {
   )
 }
 
-const UploadConfig = () => (
-  <Card class='mx-auto my-5'>
-    <CardHeader>
-      <CardTitle>Config File Upload</CardTitle>
-      {/* <CardDescription></CardDescription> */}
-    </CardHeader>
-    <CardContent class='flex gap-x-2'>
-      <Input type='file' name='configFile' />
-      <Button type='button'>Upload</Button>
-    </CardContent>
-  </Card>
-)
+function UploadConfig() {
+  const [configFileS, setConfigFileS] = createSignal<File>()
+  const [vidPathsS, setVidPathsS] = createSignal<VidPath[]>()
+  const [selectedVidPathS, setSelectedVidPathS] = createSignal<string>()
+
+  return (
+    <Card class='mx-auto my-5'>
+      <CardHeader>
+        <CardTitle>Config File Upload</CardTitle>
+        {/* <CardDescription></CardDescription> */}
+      </CardHeader>
+      <CardContent>
+        <div class='flex gap-x-2'>
+          <Input
+            type='file'
+            accept='.json'
+            name='configFile'
+            onChange={e => {
+              const files = e.target.files
+              files && files.length === 1 && setConfigFileS(files[0])
+            }}
+          />
+          <Button
+            type='button'
+            onClick={() => {
+              const configFile = configFileS()
+              configFile &&
+                api_upload_config({ configFile }).then(res => {
+                  console.log(res)
+                  setVidPathsS(res.video_paths)
+                })
+            }}
+            disabled={!configFileS()}
+          >
+            Upload
+          </Button>
+        </div>
+        {vidPathsS() && (
+          <RadioGroup
+            class='mt-2'
+            onChange={x => {
+              setSelectedVidPathS(x)
+            }}
+          >
+            {(vidPathsS() || []).map((vidPath, i) => (
+              <RadioGroupItem class='my-1' value={vidPath.path}>
+                <RadioGroupItemLabel>{vidPath.name}</RadioGroupItemLabel>
+              </RadioGroupItem>
+            ))}
+          </RadioGroup>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
 
 const ShowVideo = () => {
   let video: HTMLVideoElement | null = null

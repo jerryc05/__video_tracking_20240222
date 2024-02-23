@@ -1,17 +1,26 @@
 import axios from 'axios'
 
-export const api_start_processing = ({ video_path }: { video_path: string }) =>
-  axios
-    .post<{ message: string }>('/start_processing', { video_path })
-    .then(res => res.data)
+export type VidPath = { name: string; path: string }
 
-export const api_track_history_people_count = ({
+export async function api_upload_config({ configFile }: { configFile: File }) {
+  const formData = new FormData()
+  formData.append('configFile', configFile)
+  const res = await axios.post<{
+    video_paths: VidPath[]
+  }>('/upload_config', formData)
+  return res.data
+}
+
+export const api_start_processing = ({ video_path }: { video_path: string }) =>
+  axios.post<null>('/start_processing', { video_path }).then(res => res.data)
+
+export const api_track_people_count = ({
   video_path,
 }: {
   video_path: string
 }) =>
   axios.get<{ person_ids: number[] }>(
-    `/track_history_people_count?${new URLSearchParams({ video_path })}`
+    `/track_people_count?${new URLSearchParams({ video_path })}`
   )
 
 export const api_track_history_people_id_range = ({
