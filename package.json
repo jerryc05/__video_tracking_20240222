@@ -7,14 +7,23 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^20.11.20",
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.35",
     "solid-devtools": "^0.29.3",
+    "tailwindcss": "^3.4.1",
     "typescript": "^5.3.3",
     "vite": "^5.1.4",
     "vite-plugin-solid": "^2.10.1"
   },
   "dependencies": {
+    "@kobalte/core": "^0.12.1",
     "axios": "^1.6.7",
-    "solid-js": "^1.8.15"
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.0",
+    "solid-js": "^1.8.15",
+    "tailwind-merge": "^2.2.1",
+    "tailwindcss-animate": "^1.0.7"
   },
   "type": "module"
 }
