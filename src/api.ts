@@ -104,3 +104,38 @@ export const api_track_history_people_id_range = ({
           })}`
         )
         .then(res => res.data)
+
+//
+//
+//
+
+type api_vid_track_screenshots_t = Promise<{
+  person_id: number
+  paths: string[]
+}>
+
+export const api_vid_track_screenshots = ({
+  video_path,
+  person_id,
+}: {
+  video_path: string
+  person_id: number
+}): api_vid_track_screenshots_t =>
+  import.meta.env.DEV
+    ? Promise.resolve({
+        person_id,
+        paths: [
+          '/long/long/long/path/to/person/1.jpg',
+          '/long/long/long/path/to/person/2.jpg',
+          '/long/long/long/path/to/person/3.jpg',
+          '/long/long/long/path/to/person/4.jpg',
+        ],
+      })
+    : axios
+        .get<Awaited<api_vid_track_screenshots_t>>(
+          `/vid/track/screenshots?${new URLSearchParams({
+            person_id: person_id.toString(),
+            video_path,
+          })}`
+        )
+        .then(res => res.data)
