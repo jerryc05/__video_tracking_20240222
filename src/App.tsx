@@ -7,6 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent } from './components/ui/card'
 import {
   VidPath,
   api_start_processing,
+  api_track_history_people_id_range,
   api_track_people_count,
   api_upload_config,
 } from './api'
@@ -16,7 +17,7 @@ import {
   RadioGroupItemLabel,
 } from './components/ui/radio-group'
 
-const [selectedVidPathInfoS, setSelectedVidPathInfoS] = createSignal<{
+const [selectedVidInfoS, setSelectedVidInfoS] = createSignal<{
   absPath: string
   processingStarted?: boolean
   peopleIds?: number[]
@@ -70,16 +71,15 @@ function UploadConfig() {
           <div class='[&>*]:mt-2'>
             <RadioGroup
               onChange={x => {
-                setSelectedVidPathInfoS({ absPath: x })
+                setSelectedVidInfoS({ absPath: x })
               }}
             >
               {vidPathsS()?.map((vidPathInfo, i) => (
                 <RadioGroupItem class='my-1 truncate' value={vidPathInfo.path}>
                   <RadioGroupItemLabel class='min-w-0 flex'>
                     {vidPathInfo.name}
-                    <div class='inline-block text-gray-400 truncate'>
-                      {' '}
-                      · {vidPathInfo.path}
+                    <div class='inline-block text-gray-400 whitespace-pre truncate'>
+                      {` · ${vidPathInfo.path}`}
                     </div>
                   </RadioGroupItemLabel>
                 </RadioGroupItem>
@@ -88,46 +88,69 @@ function UploadConfig() {
             {/*  */}
             <div class='w-full flex gap-x-2'>
               <Button
-                class='flex-grow transition-all duration-1000'
+                class={`flex-1 ${
+                  selectedVidInfoS()?.processingStarted ? 'bg-green-800' : ''
+                }`}
                 type='button'
                 onClick={() => {
-                  const vidPathInfo = selectedVidPathInfoS()
+                  const vidPathInfo = selectedVidInfoS()
                   vidPathInfo &&
                     api_start_processing({
                       video_path: vidPathInfo.absPath,
                     }).then(() => {
-                      vidPathInfo.processingStarted = true
-                      setSelectedVidPathInfoS({ ...vidPathInfo })
+                      setSelectedVidInfoS({
+                        ...vidPathInfo,
+                        processingStarted: true,
+                      })
                     })
                 }}
-                disabled={!selectedVidPathInfoS()}
+                disabled={
+                  !selectedVidInfoS() || selectedVidInfoS()?.processingStarted
+                }
               >
-                Start Processing
+                {selectedVidInfoS()?.processingStarted
+                  ? 'Processed'
+                  : 'Start Processing'}
               </Button>
-              {selectedVidPathInfoS() && (
+              {selectedVidInfoS() && (
                 <Button
-                  class='flex-grow'
+                  class='flex-1'
                   type='button'
                   onClick={() => {
-                    const vidPathInfo = selectedVidPathInfoS()
+                    const vidPathInfo = selectedVidInfoS()
                     vidPathInfo &&
                       api_track_people_count({
                         video_path: vidPathInfo.absPath,
                       }).then(res => {
-                        vidPathInfo.peopleIds = res.person_ids
-                        setSelectedVidPathInfoS({ ...vidPathInfo })
+                        setSelectedVidInfoS({
+                          ...vidPathInfo,
+                          peopleIds: res.person_ids,
+                        })
                       })
                   }}
-                  disabled={!selectedVidPathInfoS()?.processingStarted}
+                  disabled={!selectedVidInfoS()?.processingStarted}
                 >
                   Refresh Track Count
                 </Button>
               )}
             </div>
             {/*  */}
-            {selectedVidPathInfoS()?.peopleIds?.map(id => {
+            {selectedVidInfoS()?.peopleIds?.map(id => {
               return (
-                <Button variant='outline' class='mx-1'>
+                <Button
+                  variant='outline'
+                  class='mx-1'
+                  onClick={() => {
+                    const selectedVidinfo = selectedVidInfoS()
+                    if (selectedVidinfo)
+                      api_track_history_people_id_range({
+                        video_path: selectedVidinfo.absPath,
+                        person_id: id,
+                      }).then(res => {
+                        console.log(res)
+                      })
+                  }}
+                >
                   {id}
                 </Button>
               )
