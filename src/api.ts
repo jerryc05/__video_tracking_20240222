@@ -75,29 +75,30 @@ export const api_track_people_count = ({
 
 type api_track_history_people_id_range_t = Promise<{
   person_id: number
-  frame_start: string
-  frame_end: string
+  frame_start_time: string
+  frame_start_no: number
+  frame_end_time: string
+  frame_end_no: number
 }>
 
 export const api_track_history_people_id_range = ({
   video_path,
   person_id,
-  type,
 }: {
   video_path: string
   person_id: number
-  type?: number
 }): api_track_history_people_id_range_t =>
   import.meta.env.DEV
     ? Promise.resolve({
         person_id,
-        frame_start: type === 0 ? '1' : '00:00:01',
-        frame_end: type === 0 ? '10' : '00:00:02',
+        frame_start_time: '00:00:00',
+        frame_start_no: 0,
+        frame_end_time: '00:00:01',
+        frame_end_no: 30,
       })
     : axios
         .get<Awaited<api_track_history_people_id_range_t>>(
           `/track_history_people_id_range?${new URLSearchParams({
-            ...(type != null && { type: type?.toString() }),
             video_path,
             person_id: person_id.toString(),
           })}`

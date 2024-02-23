@@ -157,7 +157,7 @@ function UploadConfig() {
                         video_path: selectedVidinfo.absPath,
                         person_id: id,
                       }).then(res => {
-                        setPersonIdRage(JSON.stringify(res))
+                        setPersonIdRage(JSON.stringify(res, null, 1))
                       })
                     }
                   }}
@@ -166,7 +166,7 @@ function UploadConfig() {
                 </Button>
               )
             })}
-            <div>{personIdRage()}</div>
+            <pre>{personIdRage()}</pre>
           </div>
         )}
       </CardContent>
