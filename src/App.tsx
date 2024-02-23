@@ -75,8 +75,8 @@ function UploadConfig() {
               }}
             >
               {vidPathsS()?.map((vidPathInfo, i) => (
-                <RadioGroupItem class='my-1 truncate' value={vidPathInfo.path}>
-                  <RadioGroupItemLabel class='min-w-0 flex'>
+                <RadioGroupItem class='truncate' value={vidPathInfo.path}>
+                  <RadioGroupItemLabel class='min-w-0 flex leading-loose'>
                     {vidPathInfo.name}
                     <div class='inline-block text-gray-400 whitespace-pre truncate'>
                       {` · ${vidPathInfo.path}`}
