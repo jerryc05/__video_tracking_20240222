@@ -178,7 +178,7 @@ function UploadConfig() {
 }
 
 const ShowVideo = () => {
-  let video: HTMLVideoElement | null = null
+  let video: HTMLVideoElement | undefined
   const [timestamp, setTimestamp] = createSignal(0)
   return (
     <Card>
@@ -206,13 +206,7 @@ const ShowVideo = () => {
           />
         </label>
         {/* biome-ignore lint/a11y/useMediaCaption: <explanation> */}
-        <video
-          // src={sampleVideo}
-          ref={e => {
-            video = e
-          }}
-          controls
-        />
+        <video ref={video} controls />
         <div class='flex gap-x-2'>
           <label class='flex-grow flex gap-x-2'>
             <div class='flex-shrink-0 flex items-center'>Jump to second:</div>
