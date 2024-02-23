@@ -10,6 +10,7 @@ import {
   api_track_history_people_id_range,
   api_track_people_count,
   api_upload_config,
+  api_vid_track_screenshots,
 } from './api'
 import {
   RadioGroup,
@@ -17,11 +18,18 @@ import {
   RadioGroupItemLabel,
 } from './components/ui/radio-group'
 
+//
+//
+//
+//
+//
+
 const [selectedVidInfoS, setSelectedVidInfoS] = createSignal<{
   vidPath: VidPath
   processingStarted?: boolean
   peopleIds?: number[]
   selectedPersonId?: number
+  scrshots?: string[]
 }>()
 
 export const App = () => {
@@ -32,6 +40,13 @@ export const App = () => {
     </div>
   )
 }
+
+//
+//
+//
+//
+//
+//
 
 function UploadConfig() {
   const [configFileS, setConfigFileS] = createSignal<File>()
@@ -72,6 +87,7 @@ function UploadConfig() {
         {vidPathsS() && (
           <div class='[&>*]:mt-2'>
             <RadioGroup
+              class='mt-4'
               onChange={serialized => {
                 setSelectedVidInfoS({ vidPath: JSON.parse(serialized) })
               }}
@@ -140,11 +156,11 @@ function UploadConfig() {
               )}
             </div>
             {/*  */}
-            {selectedVidInfoS()?.peopleIds?.map(id => {
+            {selectedVidInfoS()?.peopleIds?.map(person_id => {
               return (
                 <Button
                   variant={
-                    selectedVidInfoS()?.selectedPersonId === id
+                    selectedVidInfoS()?.selectedPersonId === person_id
                       ? 'default'
                       : 'outline'
                   }
@@ -152,24 +168,36 @@ function UploadConfig() {
                   onClick={() => {
                     const selectedVidinfo = selectedVidInfoS()
                     if (selectedVidinfo) {
-                      setSelectedVidInfoS({
-                        ...selectedVidinfo,
-                        selectedPersonId: id,
-                      })
+                      selectedVidinfo.selectedPersonId = person_id
+                      setSelectedVidInfoS({ ...selectedVidinfo })
+
                       api_track_history_people_id_range({
                         video_path: selectedVidinfo.vidPath.path,
-                        person_id: id,
+                        person_id,
                       }).then(res => {
                         setPersonIdRage(JSON.stringify(res, null, 1))
+                      })
+
+                      api_vid_track_screenshots({
+                        video_path: selectedVidinfo.vidPath.path,
+                        person_id,
+                      }).then(res => {
+                        selectedVidinfo.scrshots = res.paths
+                        setSelectedVidInfoS({ ...selectedVidinfo })
                       })
                     }
                   }}
                 >
-                  {id}
+                  {person_id}
                 </Button>
               )
             })}
             <pre>{personIdRage()}</pre>
+            <div class='flex gap-x-1 items-center overflow-y-auto [&>img]:max-h-52'>
+              {selectedVidInfoS()?.scrshots?.map(path => (
+                <img src={path} alt={path} />
+              ))}
+            </div>
           </div>
         )}
       </CardContent>
