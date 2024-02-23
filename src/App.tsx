@@ -4,14 +4,22 @@ import sampleVideo from '/1.mp4'
 import { Button } from './components/ui/button'
 import { Input } from './components/ui/input'
 import { Card, CardHeader, CardTitle, CardContent } from './components/ui/card'
-import { VidPath, api_upload_config } from './api'
+import {
+  VidPath,
+  api_start_processing,
+  api_track_people_count,
+  api_upload_config,
+} from './api'
 import {
   RadioGroup,
   RadioGroupItem,
   RadioGroupItemLabel,
 } from './components/ui/radio-group'
 
-const [selectedVidPathS, setSelectedVidPathS] = createSignal<string>()
+const [selectedVidPathInfoS, setSelectedVidPathInfoS] = createSignal<{
+  absPath: string
+  processingStarted?: boolean
+}>()
 
 export const App = () => {
   return (
@@ -58,18 +66,60 @@ function UploadConfig() {
           </Button>
         </div>
         {vidPathsS() && (
-          <RadioGroup
-            class='mt-2'
-            onChange={x => {
-              setSelectedVidPathS(x)
-            }}
-          >
-            {(vidPathsS() || []).map((vidPath, i) => (
-              <RadioGroupItem class='my-1' value={vidPath.path}>
-                <RadioGroupItemLabel>{vidPath.name}</RadioGroupItemLabel>
-              </RadioGroupItem>
-            ))}
-          </RadioGroup>
+          <div class='[&>*]:mt-2'>
+            <RadioGroup
+              onChange={x => {
+                setSelectedVidPathInfoS({ absPath: x })
+              }}
+            >
+              {vidPathsS()?.map((vidPathInfo, i) => (
+                <RadioGroupItem class='my-1 truncate' value={vidPathInfo.path}>
+                  <RadioGroupItemLabel class='min-w-0 flex'>
+                    {vidPathInfo.name}
+                    <div class='inline-block text-gray-400 truncate'>
+                      {' '}
+                      · {vidPathInfo.path}
+                    </div>
+                  </RadioGroupItemLabel>
+                </RadioGroupItem>
+              ))}
+            </RadioGroup>
+            <div class='w-full flex gap-x-2'>
+              <Button
+                class='flex-grow transition-all duration-1000'
+                type='button'
+                onClick={() => {
+                  const vidPathInfo = selectedVidPathInfoS()
+                  vidPathInfo &&
+                    api_start_processing({
+                      video_path: vidPathInfo.absPath,
+                    }).then(() => {
+                      vidPathInfo.processingStarted = true
+                      setSelectedVidPathInfoS({ ...vidPathInfo })
+                    })
+                }}
+                disabled={!selectedVidPathInfoS()}
+              >
+                Start Processing
+              </Button>
+              {selectedVidPathInfoS() && (
+              <Button
+                class='flex-grow'
+                type='button'
+                onClick={() => {
+                  const vidPathInfo = selectedVidPathInfoS()
+                  vidPathInfo &&
+                    api_track_people_count({
+                      video_path: vidPathInfo.absPath,
+                    })
+                }}
+                disabled={!selectedVidPathInfoS()?.processingStarted}
+              >
+                Refresh Track Count
+              </Button>
+              )}
+            </div>
+          </div>
         )}
       </CardContent>
     </Card>
