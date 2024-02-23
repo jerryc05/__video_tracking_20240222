@@ -21,6 +21,7 @@ const [selectedVidInfoS, setSelectedVidInfoS] = createSignal<{
   absPath: string
   processingStarted?: boolean
   peopleIds?: number[]
+  selectedPersonId?: number
 }>()
 
 export const App = () => {
@@ -35,6 +36,7 @@ export const App = () => {
 function UploadConfig() {
   const [configFileS, setConfigFileS] = createSignal<File>()
   const [vidPathsS, setVidPathsS] = createSignal<VidPath[]>()
+  const [personIdRage, setPersonIdRage] = createSignal<string>()
 
   return (
     <Card class='mx-auto my-5'>
@@ -138,23 +140,33 @@ function UploadConfig() {
             {selectedVidInfoS()?.peopleIds?.map(id => {
               return (
                 <Button
-                  variant='outline'
+                  variant={
+                    selectedVidInfoS()?.selectedPersonId === id
+                      ? 'default'
+                      : 'outline'
+                  }
                   class='mx-1'
                   onClick={() => {
                     const selectedVidinfo = selectedVidInfoS()
-                    if (selectedVidinfo)
+                    if (selectedVidinfo) {
+                      setSelectedVidInfoS({
+                        ...selectedVidinfo,
+                        selectedPersonId: id,
+                      })
                       api_track_history_people_id_range({
                         video_path: selectedVidinfo.absPath,
                         person_id: id,
                       }).then(res => {
-                        console.log(res)
+                        setPersonIdRage(JSON.stringify(res))
                       })
+                    }
                   }}
                 >
                   {id}
                 </Button>
               )
             })}
+            <div>{personIdRage()}</div>
           </div>
         )}
       </CardContent>
