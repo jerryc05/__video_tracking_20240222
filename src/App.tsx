@@ -1,6 +1,6 @@
 import { createSignal } from 'solid-js'
 
-import sampleVideo from '/1.mp4'
+// import sampleVideo from '/1.mp4'
 import { Button } from './components/ui/button'
 import { Input } from './components/ui/input'
 import { Card, CardHeader, CardTitle, CardContent } from './components/ui/card'
@@ -150,7 +150,7 @@ const ShowVideo = () => {
       <CardContent class='flex flex-col gap-y-3'>
         {/* biome-ignore lint/a11y/useMediaCaption: <explanation> */}
         <video
-          src={sampleVideo}
+          // src={sampleVideo}
           ref={e => {
             video = e
           }}
