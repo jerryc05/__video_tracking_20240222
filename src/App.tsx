@@ -11,6 +11,7 @@ import {
   api_track_people_count,
   api_upload_config,
   api_vid_track_screenshots,
+  get_file_url_by_path,
 } from './api'
 import {
   RadioGroup,
@@ -195,7 +196,7 @@ function UploadConfig() {
             <pre>{personIdRage()}</pre>
             <div class='flex gap-x-1 items-center overflow-y-auto [&>img]:max-h-52'>
               {selectedVidInfoS()?.scrshots?.map(path => (
-                <img src={path} alt={path} />
+                <img src={get_file_url_by_path(path)} alt={path} />
               ))}
             </div>
           </div>

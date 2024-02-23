@@ -139,3 +139,11 @@ export const api_vid_track_screenshots = ({
           })}`
         )
         .then(res => res.data)
+
+//
+//
+//
+
+export const get_file_url_by_path = (path: string) => {
+  return `/file/${encodeURIComponent(path)}`
+}
