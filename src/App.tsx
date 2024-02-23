@@ -19,6 +19,7 @@ import {
 const [selectedVidPathInfoS, setSelectedVidPathInfoS] = createSignal<{
   absPath: string
   processingStarted?: boolean
+  peopleIds?: number[]
 }>()
 
 export const App = () => {
@@ -84,6 +85,7 @@ function UploadConfig() {
                 </RadioGroupItem>
               ))}
             </RadioGroup>
+            {/*  */}
             <div class='w-full flex gap-x-2'>
               <Button
                 class='flex-grow transition-all duration-1000'
@@ -103,22 +105,33 @@ function UploadConfig() {
                 Start Processing
               </Button>
               {selectedVidPathInfoS() && (
-              <Button
-                class='flex-grow'
-                type='button'
-                onClick={() => {
-                  const vidPathInfo = selectedVidPathInfoS()
-                  vidPathInfo &&
-                    api_track_people_count({
-                      video_path: vidPathInfo.absPath,
-                    })
-                }}
-                disabled={!selectedVidPathInfoS()?.processingStarted}
-              >
-                Refresh Track Count
-              </Button>
+                <Button
+                  class='flex-grow'
+                  type='button'
+                  onClick={() => {
+                    const vidPathInfo = selectedVidPathInfoS()
+                    vidPathInfo &&
+                      api_track_people_count({
+                        video_path: vidPathInfo.absPath,
+                      }).then(res => {
+                        vidPathInfo.peopleIds = res.person_ids
+                        setSelectedVidPathInfoS({ ...vidPathInfo })
+                      })
+                  }}
+                  disabled={!selectedVidPathInfoS()?.processingStarted}
+                >
+                  Refresh Track Count
+                </Button>
               )}
             </div>
+            {/*  */}
+            {selectedVidPathInfoS()?.peopleIds?.map(id => {
+              return (
+                <Button variant='outline' class='mx-1'>
+                  {id}
+                </Button>
+              )
+            })}
           </div>
         )}
       </CardContent>
