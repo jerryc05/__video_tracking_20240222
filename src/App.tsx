@@ -64,7 +64,7 @@ const ShowVideo = () => {
           >
             Jump
           </Button>
-        </div>{' '}
+        </div>
       </CardContent>
     </Card>
   )
