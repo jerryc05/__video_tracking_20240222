@@ -18,7 +18,7 @@ import {
 } from './components/ui/radio-group'
 
 const [selectedVidInfoS, setSelectedVidInfoS] = createSignal<{
-  absPath: string
+  vidPath: VidPath
   processingStarted?: boolean
   peopleIds?: number[]
   selectedPersonId?: number
@@ -28,7 +28,7 @@ export const App = () => {
   return (
     <div class='mx-[5%]'>
       <UploadConfig />
-      <ShowVideo />
+      {selectedVidInfoS() && <ShowVideo />}
     </div>
   )
 }
@@ -72,12 +72,15 @@ function UploadConfig() {
         {vidPathsS() && (
           <div class='[&>*]:mt-2'>
             <RadioGroup
-              onChange={x => {
-                setSelectedVidInfoS({ absPath: x })
+              onChange={serialized => {
+                setSelectedVidInfoS({ vidPath: JSON.parse(serialized) })
               }}
             >
               {vidPathsS()?.map((vidPathInfo, i) => (
-                <RadioGroupItem class='truncate' value={vidPathInfo.path}>
+                <RadioGroupItem
+                  class='truncate'
+                  value={JSON.stringify(vidPathInfo)}
+                >
                   <RadioGroupItemLabel class='min-w-0 flex leading-loose'>
                     {vidPathInfo.name}
                     <div class='inline-block text-gray-400 whitespace-pre truncate'>
@@ -98,7 +101,7 @@ function UploadConfig() {
                   const vidPathInfo = selectedVidInfoS()
                   vidPathInfo &&
                     api_start_processing({
-                      video_path: vidPathInfo.absPath,
+                      video_path: vidPathInfo.vidPath.path,
                     }).then(() => {
                       setSelectedVidInfoS({
                         ...vidPathInfo,
@@ -122,7 +125,7 @@ function UploadConfig() {
                     const vidPathInfo = selectedVidInfoS()
                     vidPathInfo &&
                       api_track_people_count({
-                        video_path: vidPathInfo.absPath,
+                        video_path: vidPathInfo.vidPath.path,
                       }).then(res => {
                         setSelectedVidInfoS({
                           ...vidPathInfo,
@@ -154,7 +157,7 @@ function UploadConfig() {
                         selectedPersonId: id,
                       })
                       api_track_history_people_id_range({
-                        video_path: selectedVidinfo.absPath,
+                        video_path: selectedVidinfo.vidPath.path,
                         person_id: id,
                       }).then(res => {
                         setPersonIdRage(JSON.stringify(res, null, 1))
@@ -183,6 +186,25 @@ const ShowVideo = () => {
         <CardTitle>Video</CardTitle>
       </CardHeader>
       <CardContent class='flex flex-col gap-y-3'>
+        <label class='flex gap-x-3'>
+          <div class='flex-shrink-0 flex items-center whitespace-pre'>
+            Locate file{' '}
+            <b>
+              <u>{selectedVidInfoS()?.vidPath.name}</u>
+            </b>{' '}
+            to preview
+          </div>
+          <Input
+            type='file'
+            accept='video/*'
+            onChange={e => {
+              const file = e.target.files?.[0]
+              if (file && video) {
+                video.src = URL.createObjectURL(file)
+              }
+            }}
+          />
+        </label>
         {/* biome-ignore lint/a11y/useMediaCaption: <explanation> */}
         <video
           // src={sampleVideo}
