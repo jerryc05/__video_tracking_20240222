@@ -11,6 +11,8 @@ import {
   RadioGroupItemLabel,
 } from './components/ui/radio-group'
 
+const [selectedVidPathS, setSelectedVidPathS] = createSignal<string>()
+
 export const App = () => {
   return (
     <div class='mx-[5%]'>
@@ -23,7 +25,6 @@ export const App = () => {
 function UploadConfig() {
   const [configFileS, setConfigFileS] = createSignal<File>()
   const [vidPathsS, setVidPathsS] = createSignal<VidPath[]>()
-  const [selectedVidPathS, setSelectedVidPathS] = createSignal<string>()
 
   return (
     <Card class='mx-auto my-5'>
@@ -48,7 +49,6 @@ function UploadConfig() {
               const configFile = configFileS()
               configFile &&
                 api_upload_config({ configFile }).then(res => {
-                  console.log(res)
                   setVidPathsS(res.video_paths)
                 })
             }}
