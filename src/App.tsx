@@ -1,4 +1,4 @@
-import { createSignal } from 'solid-js'
+import { ErrorBoundary, createSignal } from 'solid-js'
 
 // import sampleVideo from '/1.mp4'
 import { Button } from './components/ui/button'
@@ -39,10 +39,19 @@ let video: HTMLVideoElement | undefined
 
 export const App = () => {
   return (
-    <div class='mx-[5%]'>
-      <UploadConfig />
-      {selectedVidInfoS() && <ShowVideo />}
-    </div>
+    <ErrorBoundary
+      fallback={err => (
+        <>
+          <h1>Error</h1>
+          <div class='text-3xl'>{err}</div>
+        </>
+      )}
+    >
+      <div class='mx-[5%]'>
+        <UploadConfig />
+        {selectedVidInfoS() && <ShowVideo />}
+      </div>
+    </ErrorBoundary>
   )
 }
 
