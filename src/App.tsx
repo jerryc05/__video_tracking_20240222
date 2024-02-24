@@ -1,6 +1,5 @@
 import { ErrorBoundary, createSignal } from 'solid-js'
 
-// import sampleVideo from '/1.mp4'
 import { Button } from './components/ui/button'
 import { Input } from './components/ui/input'
 import { Card, CardHeader, CardTitle, CardContent } from './components/ui/card'
@@ -214,7 +213,7 @@ function UploadConfig() {
                 return (
                   <>
                     <div>
-                      {sec_to_hms(personIdRange.frame_start_time_sec)} to
+                      {sec_to_hms(personIdRange.frame_start_time_sec)} to{' '}
                       {sec_to_hms(personIdRange.frame_end_time_sec)}
                     </div>
                     <Button
@@ -257,25 +256,6 @@ const ShowVideo = () => {
         <CardTitle>Video</CardTitle>
       </CardHeader>
       <CardContent class='flex flex-col gap-y-3'>
-        {/* <label class='flex gap-x-3'>
-          <div class='flex-shrink-0 flex items-center whitespace-pre'>
-            Locate file{' '}
-            <b>
-              <u>{selectedVidInfoS()?.vidPath.name}</u>
-            </b>{' '}
-            to preview
-          </div>
-          <Input
-            type='file'
-            accept='video/*'
-            onChange={e => {
-              const file = e.target.files?.[0]
-              if (file && video) {
-                video.src = URL.createObjectURL(file)
-              }
-            }}
-          />
-        </label> */}
         {/* biome-ignore lint/a11y/useMediaCaption: <explanation> */}
         <video ref={video} controls preload='metadata' />
         <div class='flex gap-x-2'>
