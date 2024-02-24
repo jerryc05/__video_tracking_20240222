@@ -144,6 +144,5 @@ export const api_vid_track_screenshots = ({
 //
 //
 
-export const get_file_url_by_path = (path: string) => {
-  return `/file/${encodeURIComponent(path)}`
-}
+export const get_file_url_by_path = (path: string) =>
+  `/file/${encodeURIComponent(path)}`
