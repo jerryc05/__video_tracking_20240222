@@ -75,10 +75,8 @@ export const api_track_people_count = ({
 
 export type api_track_history_people_id_range_t = Promise<{
   person_id: number
-  frame_start_time_sec: number // float
-  frame_start_frame_no: number // int
-  frame_end_time_sec: number // float
-  frame_end_frame_no: number // int
+  frame_start_time_sec: number
+  frame_end_time_sec: number
 }>
 
 export const api_track_history_people_id_range = ({
@@ -92,9 +90,7 @@ export const api_track_history_people_id_range = ({
     ? Promise.resolve({
         person_id,
         frame_start_time_sec: 1.5,
-        frame_start_frame_no: 0,
         frame_end_time_sec: 1.5,
-        frame_end_frame_no: 30,
       })
     : axios
         .get<Awaited<api_track_history_people_id_range_t>>(
