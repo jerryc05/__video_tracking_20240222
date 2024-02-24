@@ -19,6 +19,7 @@ import {
   RadioGroupItem,
   RadioGroupItemLabel,
 } from './components/ui/radio-group'
+import { sec_to_hms } from './utils'
 
 //
 //
@@ -203,8 +204,10 @@ function UploadConfig() {
               if (selectedVidInfo && personIdRange)
                 return (
                   <>
-                    <div>Start: {personIdRange.frame_start_time_sec} sec</div>
-                    <div>End: {personIdRange.frame_end_time_sec} sec</div>{' '}
+                    <div>
+                      {sec_to_hms(personIdRange.frame_start_time_sec)} to
+                      {sec_to_hms(personIdRange.frame_end_time_sec)}
+                    </div>
                     <Button
                       variant='outline'
                       onClick={() => {
