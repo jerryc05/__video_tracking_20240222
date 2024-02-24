@@ -211,27 +211,22 @@ function UploadConfig() {
               const personIdRange = personIdRangeS()
               if (selectedVidInfo && personIdRange)
                 return (
-                  <>
-                    <div>
-                      {sec_to_hms(personIdRange.frame_start_time_sec)} to{' '}
-                      {sec_to_hms(personIdRange.frame_end_time_sec)}
-                    </div>
-                    <Button
-                      variant='outline'
-                      onClick={() => {
-                        if (video) {
-                          video.src = `${get_file_url_by_path(
-                            selectedVidInfo.vidPath.path
-                          )}#t=${personIdRange.frame_start_time_sec},${
-                            personIdRange.frame_end_time_sec
-                          }`
-                          video.play()
-                        }
-                      }}
-                    >
-                      Play
-                    </Button>
-                  </>
+                  <Button
+                    variant='outline'
+                    onClick={() => {
+                      if (video) {
+                        video.src = `${get_file_url_by_path(
+                          selectedVidInfo.vidPath.path
+                        )}#t=${personIdRange.frame_start_time_sec},${
+                          personIdRange.frame_end_time_sec
+                        }`
+                        video.play()
+                      }
+                    }}
+                  >
+                    Play {sec_to_hms(personIdRange.frame_start_time_sec)} to{' '}
+                    {sec_to_hms(personIdRange.frame_end_time_sec)}
+                  </Button>
                 )
             })()}
             <div class='flex gap-x-1 items-center overflow-y-auto [&>img]:max-h-52'>
