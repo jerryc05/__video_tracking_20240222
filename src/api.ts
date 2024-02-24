@@ -73,7 +73,7 @@ export const api_track_people_count = ({
 //
 //
 
-type api_track_history_people_id_range_t = Promise<{
+export type api_track_history_people_id_range_t = Promise<{
   person_id: number
   frame_start_time_sec: number // float
   frame_start_frame_no: number // int

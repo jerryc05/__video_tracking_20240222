@@ -8,6 +8,7 @@ import {
   VidPath,
   api_start_processing,
   api_track_history_people_id_range,
+  api_track_history_people_id_range_t,
   api_track_people_count,
   api_upload_config,
   api_vid_track_screenshots,
@@ -33,6 +34,8 @@ const [selectedVidInfoS, setSelectedVidInfoS] = createSignal<{
   scrshots?: string[]
 }>()
 
+let video: HTMLVideoElement | undefined
+
 export const App = () => {
   return (
     <div class='mx-[5%]'>
@@ -52,7 +55,8 @@ export const App = () => {
 function UploadConfig() {
   const [configFileS, setConfigFileS] = createSignal<File>()
   const [vidPathsS, setVidPathsS] = createSignal<VidPath[]>()
-  const [personIdRage, setPersonIdRage] = createSignal<string>()
+  const [personIdRangeS, setPersonIdRange] =
+    createSignal<Awaited<api_track_history_people_id_range_t>>()
 
   return (
     <Card class='mx-auto my-5'>
@@ -176,7 +180,7 @@ function UploadConfig() {
                         video_path: selectedVidinfo.vidPath.path,
                         person_id,
                       }).then(res => {
-                        setPersonIdRage(JSON.stringify(res, null, 1))
+                        setPersonIdRange(res)
                       })
 
                       api_vid_track_screenshots({
@@ -193,7 +197,32 @@ function UploadConfig() {
                 </Button>
               )
             })}
-            <pre>{personIdRage()}</pre>
+            {(() => {
+              const selectedVidInfo = selectedVidInfoS()
+              const personIdRange = personIdRangeS()
+              if (selectedVidInfo && personIdRange)
+                return (
+                  <>
+                    <div>Start: {personIdRange.frame_start_time_sec} sec</div>
+                    <div>End: {personIdRange.frame_end_time_sec} sec</div>{' '}
+                    <Button
+                      variant='outline'
+                      onClick={() => {
+                        if (video) {
+                          video.src = `${get_file_url_by_path(
+                            selectedVidInfo.vidPath.path
+                          )}#t=${personIdRange.frame_start_time_sec},${
+                            personIdRange.frame_end_time_sec
+                          }`
+                          video.play()
+                        }
+                      }}
+                    >
+                      Play
+                    </Button>
+                  </>
+                )
+            })()}
             <div class='flex gap-x-1 items-center overflow-y-auto [&>img]:max-h-52'>
               {selectedVidInfoS()?.scrshots?.map(path => (
                 <img src={get_file_url_by_path(path)} alt={path} />
@@ -207,15 +236,16 @@ function UploadConfig() {
 }
 
 const ShowVideo = () => {
-  let video: HTMLVideoElement | undefined
   const [timestamp, setTimestamp] = createSignal(0)
+  const selectedVidInfo = selectedVidInfoS()
+  if (!selectedVidInfo) return null
   return (
     <Card>
       <CardHeader>
         <CardTitle>Video</CardTitle>
       </CardHeader>
       <CardContent class='flex flex-col gap-y-3'>
-        <label class='flex gap-x-3'>
+        {/* <label class='flex gap-x-3'>
           <div class='flex-shrink-0 flex items-center whitespace-pre'>
             Locate file{' '}
             <b>
@@ -233,9 +263,9 @@ const ShowVideo = () => {
               }
             }}
           />
-        </label>
+        </label> */}
         {/* biome-ignore lint/a11y/useMediaCaption: <explanation> */}
-        <video ref={video} controls />
+        <video ref={video} controls preload='metadata' />
         <div class='flex gap-x-2'>
           <label class='flex-grow flex gap-x-2'>
             <div class='flex-shrink-0 flex items-center'>Jump to second:</div>
