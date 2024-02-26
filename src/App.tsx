@@ -6,12 +6,12 @@ import { Card, CardHeader, CardTitle, CardContent } from './components/ui/card'
 import {
   VidPath,
   api_start_processing,
-  api_vid_track_pid_range_get,
-  api_vid_track_pid_range_get_t,
-  api_vid_track_pids,
+  api_vid_track_pid,
+  api_vid_track_pid_t,
+  api_vid_track_pid_list,
   api_upload_config,
-  api_vid_track_screenshots,
   get_file_url_by_path,
+  api_vid_track_pid_list_t,
 } from './api'
 import {
   RadioGroup,
@@ -29,9 +29,8 @@ import { sec_to_hms } from './utils'
 const [selectedVidInfoS, setSelectedVidInfoS] = createSignal<{
   vidPath: VidPath
   processingStarted?: boolean
-  peopleIds?: number[]
-  selectedPersonId?: number
-  scrshots?: string[]
+  pids?: Awaited<api_vid_track_pid_list_t>['person_ids']
+  selectedPerson?: { pid: number; info?: Awaited<api_vid_track_pid_t> }
 }>()
 
 let video: HTMLVideoElement | undefined
@@ -64,8 +63,6 @@ export const App = () => {
 function UploadConfig() {
   const [configFileS, setConfigFileS] = createSignal<File>()
   const [vidPathsS, setVidPathsS] = createSignal<VidPath[]>()
-  const [personIdRangeS, setPersonIdRange] =
-    createSignal<Awaited<api_vid_track_pid_range_get_t>>()
 
   return (
     <Card class='mx-auto my-5'>
@@ -154,7 +151,7 @@ function UploadConfig() {
                   onClick={() => {
                     const vidPathInfo = selectedVidInfoS()
                     vidPathInfo &&
-                      api_vid_track_pids({
+                      api_vid_track_pid_list({
                         video_path: vidPathInfo.vidPath.path,
                       }).then(res => {
                         setSelectedVidInfoS({
@@ -170,36 +167,33 @@ function UploadConfig() {
               )}
             </div>
             {/*  */}
-            {selectedVidInfoS()?.peopleIds?.map(person_id => {
+            {selectedVidInfoS()?.pids?.map(person_id => {
               return (
                 <Button
                   variant={
-                    selectedVidInfoS()?.selectedPersonId === person_id
+                    selectedVidInfoS()?.selectedPerson?.pid === person_id
                       ? 'default'
                       : 'outline'
                   }
                   class='mx-1'
                   onClick={() => {
                     const selectedVidinfo = selectedVidInfoS()
-                    if (selectedVidinfo) {
-                      selectedVidinfo.selectedPersonId = person_id
+                    if (selectedVidinfo?.selectedPerson) {
+                      selectedVidinfo.selectedPerson = { pid: person_id }
                       setSelectedVidInfoS({ ...selectedVidinfo })
 
-                      api_vid_track_pid_range_get({
+                      api_vid_track_pid({
                         video_path: selectedVidinfo.vidPath.path,
                         person_id,
                       }).then(res => {
                         if (res.frame_start_time_sec === res.frame_end_time_sec)
                           res.frame_end_time_sec += 1
-                        setPersonIdRange(res)
-                      })
-
-                      api_vid_track_screenshots({
-                        video_path: selectedVidinfo.vidPath.path,
-                        person_id,
-                      }).then(res => {
-                        selectedVidinfo.scrshots = res.paths
-                        setSelectedVidInfoS({ ...selectedVidinfo })
+                        if (
+                          selectedVidinfo.selectedPerson?.pid === res.person_id
+                        ) {
+                          selectedVidinfo.selectedPerson.info = res
+                          setSelectedVidInfoS({ ...selectedVidinfo })
+                        }
                       })
                     }
                   }}
@@ -210,7 +204,7 @@ function UploadConfig() {
             })}
             {(() => {
               const selectedVidInfo = selectedVidInfoS()
-              const personIdRange = personIdRangeS()
+              const personIdRange = selectedVidInfo?.selectedPerson?.info
               if (selectedVidInfo && personIdRange)
                 return (
                   <Button
@@ -232,9 +226,11 @@ function UploadConfig() {
                 )
             })()}
             <div class='flex gap-x-1 items-center overflow-y-auto [&>img]:max-h-52'>
-              {selectedVidInfoS()?.scrshots?.map(path => (
-                <img src={get_file_url_by_path(path)} alt={path} />
-              ))}
+              {selectedVidInfoS()?.selectedPerson?.info?.scrshot_paths.map(
+                path => (
+                  <img src={get_file_url_by_path(path)} alt={path} />
+                )
+              )}
             </div>
           </div>
         )}

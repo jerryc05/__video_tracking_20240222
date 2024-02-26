@@ -53,19 +53,22 @@ export const api_start_processing = ({
 //
 //
 
-type api_vid_track_pids_t = Promise<{
+const url_vid_track_person_ids = ({ video_path }: { video_path: string }) =>
+  `/vid/${encodeURIComponent(video_path)}/person-ids`
+
+export type api_vid_track_pid_list_t = Promise<{
   person_ids: number[]
 }>
-export const api_vid_track_pids = ({
+export const api_vid_track_pid_list = ({
   video_path,
 }: {
   video_path: string
-}): api_vid_track_pids_t =>
+}): api_vid_track_pid_list_t =>
   import.meta.env.DEV
     ? Promise.resolve({ person_ids: [1, 2, 3, 4, 5, 6, 7, 8, 9] })
     : axios
-        .get<Awaited<api_vid_track_pids_t>>(
-          `/vid/${encodeURIComponent(video_path)}/track/person-ids`
+        .get<Awaited<api_vid_track_pid_list_t>>(
+          url_vid_track_person_ids({ video_path })
         )
         .then(res => res.data)
 
@@ -73,39 +76,44 @@ export const api_vid_track_pids = ({
 //
 //
 
-const url_vid_track_pid_range = ({
+const url_vid_track_pid = ({
   video_path,
   person_id,
 }: {
   video_path: string
   person_id: number
 }) =>
-  `/vid/${encodeURIComponent(video_path)}/track/person-ids/${encodeURIComponent(
-    person_id
-  )}`
+  `${url_vid_track_person_ids({ video_path })}/${encodeURIComponent(person_id)}`
 
-export type api_vid_track_pid_range_get_t = Promise<{
+export type api_vid_track_pid_t = Promise<{
   person_id: number
   frame_start_time_sec: number
   frame_end_time_sec: number
+  scrshot_paths: string[]
 }>
 
-export const api_vid_track_pid_range_get = ({
+export const api_vid_track_pid = ({
   video_path,
   person_id,
 }: {
   video_path: string
   person_id: number
-}): api_vid_track_pid_range_get_t =>
+}): api_vid_track_pid_t =>
   import.meta.env.DEV
     ? Promise.resolve({
         person_id,
         frame_start_time_sec: 1.5,
         frame_end_time_sec: 2.5,
+        scrshot_paths: [
+          '/long/long/long/path/to/person/1.jpg',
+          '/long/long/long/path/to/person/2.jpg',
+          '/long/long/long/path/to/person/3.jpg',
+          '/long/long/long/path/to/person/4.jpg',
+        ],
       })
     : axios
-        .get<Awaited<api_vid_track_pid_range_get_t>>(
-          url_vid_track_pid_range({ video_path, person_id })
+        .get<Awaited<api_vid_track_pid_t>>(
+          url_vid_track_pid({ video_path, person_id })
         )
         .then(res => res.data)
 
@@ -113,20 +121,20 @@ export const api_vid_track_pid_range_get = ({
 //
 //
 
-export type api_vid_track_pid_range_del_t = Promise<void>
+export type api_vid_track_pid_del_t = Promise<void>
 
-export const api_vid_track_pid_range_del = ({
+export const api_vid_track_pid_del = ({
   video_path,
   person_id,
 }: {
   video_path: string
   person_id: number
-}): api_vid_track_pid_range_del_t =>
+}): api_vid_track_pid_del_t =>
   import.meta.env.DEV
     ? Promise.resolve()
     : axios
-        .delete<Awaited<api_vid_track_pid_range_del_t>>(
-          url_vid_track_pid_range({ video_path, person_id })
+        .delete<Awaited<api_vid_track_pid_del_t>>(
+          url_vid_track_pid({ video_path, person_id })
         )
         .then(res => res.data)
 
@@ -148,47 +156,13 @@ export async function api_vid_track_pid_range_merge({
     throw new Error(`person_ids.length<2 (${person_ids})`)
 
   const res = await axios.put<Awaited<api_vid_track_pid_range_merge_t>>(
-    url_vid_track_pid_range({ video_path, person_id: person_ids[0] }),
+    url_vid_track_pid({ video_path, person_id: person_ids[0] }),
     {
       merge_with: person_ids.slice(1),
     }
   )
   return res.data
 }
-//
-//
-//
-
-type api_vid_track_screenshots_t = Promise<{
-  person_id: number
-  paths: string[]
-}>
-
-export const api_vid_track_screenshots = ({
-  video_path,
-  person_id,
-}: {
-  video_path: string
-  person_id: number
-}): api_vid_track_screenshots_t =>
-  import.meta.env.DEV
-    ? Promise.resolve({
-        person_id,
-        paths: [
-          '/long/long/long/path/to/person/1.jpg',
-          '/long/long/long/path/to/person/2.jpg',
-          '/long/long/long/path/to/person/3.jpg',
-          '/long/long/long/path/to/person/4.jpg',
-        ],
-      })
-    : axios
-        .get<Awaited<api_vid_track_screenshots_t>>(
-          `/vid/track/screenshots?${new URLSearchParams({
-            person_id: person_id.toString(),
-            video_path,
-          })}`
-        )
-        .then(res => res.data)
 
 //
 //
