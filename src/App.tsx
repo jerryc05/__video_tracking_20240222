@@ -162,13 +162,13 @@ function UploadConfig() {
                       }).then(res => {
                         setSelectedVidInfoS({
                           ...vidPathInfo,
-                          peopleIds: res.person_ids,
+                          pids: res.person_ids,
                         })
                       })
                   }}
                   disabled={!selectedVidInfoS()?.processingStarted}
                 >
-                  Refresh Track Count
+                  Refresh Detail
                 </Button>
               )}
             </div>
@@ -184,7 +184,7 @@ function UploadConfig() {
                   class='mx-1'
                   onClick={() => {
                     const selectedVidinfo = selectedVidInfoS()
-                    if (selectedVidinfo?.selectedPerson) {
+                    if (selectedVidinfo) {
                       selectedVidinfo.selectedPerson = { pid: person_id }
                       setSelectedVidInfoS({ ...selectedVidinfo })
 
@@ -192,8 +192,6 @@ function UploadConfig() {
                         video_path: selectedVidinfo.vidPath.path,
                         person_id,
                       }).then(res => {
-                        if (res.frame_start_time_sec === res.frame_end_time_sec)
-                          res.frame_end_time_sec += 1
                         if (
                           selectedVidinfo.selectedPerson?.pid === res.person_id
                         ) {
@@ -217,11 +215,11 @@ function UploadConfig() {
                     variant='outline'
                     onClick={() => {
                       if (videoEl) {
+                        const start = personIdRange.frame_start_time_sec
+                        const end = personIdRange.frame_end_time_sec
                         videoEl.src = `${get_file_url_by_path(
                           selectedVidInfo.vidPath.path
-                        )}#t=${personIdRange.frame_start_time_sec},${
-                          personIdRange.frame_end_time_sec
-                        }`
+                        )}#t=${start},${start !== end ? end : end + 1}`
                         videoEl.play()
                       }
                     }}
