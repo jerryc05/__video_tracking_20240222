@@ -1,8 +1,8 @@
 import { ErrorBoundary, createSignal } from 'solid-js'
 
-import { Button } from './components/ui/button'
-import { Input } from './components/ui/input'
-import { Card, CardHeader, CardTitle, CardContent } from './components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import {
   VidPath,
   api_start_processing,
@@ -12,12 +12,12 @@ import {
   api_upload_config,
   get_file_url_by_path,
   api_vid_track_pid_list_t,
-} from './api'
+} from '@/api'
 import {
   RadioGroup,
   RadioGroupItem,
   RadioGroupItemLabel,
-} from './components/ui/radio-group'
+} from '@/components/ui/radio-group'
 import { sec_to_hms } from './utils'
 
 //
