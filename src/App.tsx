@@ -189,6 +189,8 @@ function UploadConfig() {
                         video_path: selectedVidinfo.vidPath.path,
                         person_id,
                       }).then(res => {
+                        if (res.frame_start_time_sec === res.frame_end_time_sec)
+                          res.frame_end_time_sec += 1
                         setPersonIdRange(res)
                       })
 
