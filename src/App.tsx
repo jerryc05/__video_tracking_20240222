@@ -181,24 +181,27 @@ function UploadConfig() {
                       ? 'default'
                       : 'outline'
                   }
-                  class='mx-1'
+                  class='w-12 mx-1 border-[1px]'
                   onClick={() => {
                     const selectedVidinfo = selectedVidInfoS()
                     if (selectedVidinfo) {
-                      selectedVidinfo.selectedPerson = { pid: person_id }
-                      setSelectedVidInfoS({ ...selectedVidinfo })
+                      if (selectedVidinfo.selectedPerson?.pid !== person_id) {
+                        selectedVidinfo.selectedPerson = { pid: person_id }
+                        setSelectedVidInfoS({ ...selectedVidinfo })
 
-                      api_vid_track_pid({
-                        video_path: selectedVidinfo.vidPath.path,
-                        person_id,
-                      }).then(res => {
-                        if (
-                          selectedVidinfo.selectedPerson?.pid === res.person_id
-                        ) {
-                          selectedVidinfo.selectedPerson.info = res
-                          setSelectedVidInfoS({ ...selectedVidinfo })
-                        }
-                      })
+                        api_vid_track_pid({
+                          video_path: selectedVidinfo.vidPath.path,
+                          person_id,
+                        }).then(res => {
+                          if (
+                            selectedVidinfo.selectedPerson?.pid ===
+                            res.person_id
+                          ) {
+                            selectedVidinfo.selectedPerson.info = res
+                            setSelectedVidInfoS({ ...selectedVidinfo })
+                          }
+                        })
+                      }
                     }
                   }}
                 >
@@ -212,7 +215,7 @@ function UploadConfig() {
               if (selectedVidInfo && personIdRange)
                 return (
                   <Button
-                    variant='outline'
+                    class='block'
                     onClick={() => {
                       if (videoEl) {
                         const start = personIdRange.frame_start_time_sec
