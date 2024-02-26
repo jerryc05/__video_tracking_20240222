@@ -1,4 +1,4 @@
-import { ErrorBoundary, createSignal } from 'solid-js'
+import { ErrorBoundary, Show, createSignal } from 'solid-js'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -7,11 +7,12 @@ import {
   VidPath,
   api_start_processing,
   api_vid_track_pid,
-  api_vid_track_pid_t,
   api_vid_track_pid_list,
   api_upload_config,
-  get_file_url_by_path,
   api_vid_track_pid_list_t,
+  api_vid_track_pid_t,
+  get_file_url_by_path,
+  api_vid_track_pid_del,
 } from '@/api'
 import {
   RadioGroup,
@@ -20,25 +21,23 @@ import {
 } from '@/components/ui/radio-group'
 import { sec_to_hms } from './utils'
 
-//
-//
-//
-//
-//
-
-const [selectedVidInfoS, setSelectedVidInfoS] = createSignal<{
+export const [selectedVidInfoS, setSelectedVidInfoS] = createSignal<{
   vidPath: VidPath
-  processingStarted?: boolean
+  isProcessing?: boolean
   pids?: Awaited<api_vid_track_pid_list_t>['person_ids']
   selectedPerson?: { pid: number; info?: Awaited<api_vid_track_pid_t> }
 }>()
-
-let videoEl: HTMLVideoElement | undefined
+//
+//
+//
+//
+//
 
 export const App = () => {
   return (
     <ErrorBoundary
       fallback={(err, reset) => {
+        console.error(err)
         let msg = err
         if (err instanceof Error) msg = `${err.stack}\n${err.cause ?? ''}`
         else if (err.toString) msg = err.toString()
@@ -124,10 +123,12 @@ function UploadConfig() {
               ))}
             </RadioGroup>
             {/*  */}
+            {/*  */}
+            {/*  */}
             <div class='w-full flex gap-x-2'>
               <Button
                 class={`flex-1 ${
-                  selectedVidInfoS()?.processingStarted ? 'bg-green-800' : ''
+                  selectedVidInfoS()?.isProcessing ? 'bg-green-800' : ''
                 }`}
                 type='button'
                 onClick={() => {
@@ -138,16 +139,16 @@ function UploadConfig() {
                     }).then(() => {
                       setSelectedVidInfoS({
                         ...vidPathInfo,
-                        processingStarted: true,
+                        isProcessing: true,
                       })
                     })
                 }}
                 disabled={
-                  !selectedVidInfoS() || selectedVidInfoS()?.processingStarted
+                  !selectedVidInfoS() || selectedVidInfoS()?.isProcessing
                 }
               >
-                {selectedVidInfoS()?.processingStarted
-                  ? 'Processed'
+                {selectedVidInfoS()?.isProcessing
+                  ? 'Processing'
                   : 'Start Processing'}
               </Button>
               {selectedVidInfoS() && (
@@ -166,12 +167,14 @@ function UploadConfig() {
                         })
                       })
                   }}
-                  disabled={!selectedVidInfoS()?.processingStarted}
+                  disabled={!selectedVidInfoS()?.isProcessing}
                 >
                   Refresh Detail
                 </Button>
               )}
             </div>
+            {/*  */}
+            {/*  */}
             {/*  */}
             {selectedVidInfoS()?.pids?.map(person_id => {
               return (
@@ -209,36 +212,7 @@ function UploadConfig() {
                 </Button>
               )
             })}
-            {(() => {
-              const selectedVidInfo = selectedVidInfoS()
-              const personIdRange = selectedVidInfo?.selectedPerson?.info
-              if (selectedVidInfo && personIdRange)
-                return (
-                  <Button
-                    class='block'
-                    onClick={() => {
-                      if (videoEl) {
-                        const start = personIdRange.frame_start_time_sec
-                        const end = personIdRange.frame_end_time_sec
-                        videoEl.src = `${get_file_url_by_path(
-                          selectedVidInfo.vidPath.path
-                        )}#t=${start},${start !== end ? end : end + 1}`
-                        videoEl.play()
-                      }
-                    }}
-                  >
-                    Play {sec_to_hms(personIdRange.frame_start_time_sec)} to{' '}
-                    {sec_to_hms(personIdRange.frame_end_time_sec)}
-                  </Button>
-                )
-            })()}
-            <div class='flex gap-x-1 items-center overflow-y-auto [&>img]:max-h-52'>
-              {selectedVidInfoS()?.selectedPerson?.info?.scrshot_paths.map(
-                path => (
-                  <img src={get_file_url_by_path(path)} alt={path} />
-                )
-              )}
-            </div>
+            {selectedVidInfoS()?.selectedPerson?.info && <PersonInfo />}
           </div>
         )}
       </CardContent>
@@ -246,8 +220,67 @@ function UploadConfig() {
   )
 }
 
+function PersonInfo() {
+  const selectedVidInfo = selectedVidInfoS()
+  const info = selectedVidInfo?.selectedPerson?.info
+
+  if (selectedVidInfo != null && info != null)
+    return (
+      <div>
+        <div class='flex items-center gap-x-2'>
+          <div class='font-bold text-xl'>Person </div>
+          <div class='font-bold text-3xl'>{info.person_id}</div>
+          <div class='flex-grow text-center'>
+            {sec_to_hms(info.frame_start_time_sec)} to{' '}
+            {sec_to_hms(info.frame_end_time_sec)}
+          </div>
+          <Button
+            onClick={() => {
+              const videoEl = document.getElementsByTagName('video')[0]
+              if (videoEl) {
+                const start = info.frame_start_time_sec
+                const end = info.frame_end_time_sec
+                videoEl.src = `${get_file_url_by_path(
+                  selectedVidInfo.vidPath.path
+                )}#t=${start},${start !== end ? end : end + 1}`
+                videoEl.play()
+              }
+            }}
+          >
+            Play Clip
+          </Button>
+          <Button
+            variant='destructive'
+            onClick={() => {
+              api_vid_track_pid_del({
+                video_path: selectedVidInfo.vidPath.path,
+                person_id: info.person_id,
+              }).then(() => {
+                api_vid_track_pid_list({
+                  video_path: selectedVidInfo.vidPath.path,
+                }).then(res => {
+                  selectedVidInfo.pids = res.person_ids
+                  selectedVidInfo.selectedPerson = undefined
+                  setSelectedVidInfoS({ ...selectedVidInfo })
+                })
+              })
+            }}
+          >
+            Delete
+          </Button>
+        </div>
+        <div class='flex gap-x-1 items-center overflow-y-auto [&>img]:max-h-52'>
+          {selectedVidInfoS()?.selectedPerson?.info?.scrshot_paths.map(path => (
+            <img src={get_file_url_by_path(path)} alt={path} />
+          ))}
+        </div>
+      </div>
+    )
+}
+
 const ShowVideo = () => {
   const [timestamp, setTimestamp] = createSignal(0)
+  let videoEl: HTMLVideoElement | undefined
   const selectedVidInfo = selectedVidInfoS()
   if (!selectedVidInfo) return null
   return (
