@@ -249,8 +249,8 @@ function PersonInfo({
         <div class='h-4' />
         <div class='flex items-center gap-x-2'>
           <div class='font-bold text-xl'> Person </div>
-          <div class='font-bold text-3xl'>#{info.person_id}</div>
-          <div class='flex-grow text-center'>
+          <div class='flex-grow font-bold text-3xl'>#{info.person_id}</div>
+          <div class='mr-3'>
             🎬 {sec_to_hms(info.frame_start_time_sec)} to 🎬{' '}
             {sec_to_hms(info.frame_end_time_sec)}
           </div>
