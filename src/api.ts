@@ -53,19 +53,19 @@ export const api_start_processing = ({
 //
 //
 
-type api_track_people_count_t = Promise<{
+type api_vid_track_pids_t = Promise<{
   person_ids: number[]
 }>
-export const api_track_people_count = ({
+export const api_vid_track_pids = ({
   video_path,
 }: {
   video_path: string
-}): api_track_people_count_t =>
+}): api_vid_track_pids_t =>
   import.meta.env.DEV
     ? Promise.resolve({ person_ids: [1, 2, 3, 4, 5, 6, 7, 8, 9] })
     : axios
-        .get<Awaited<api_track_people_count_t>>(
-          `/track_people_count?${new URLSearchParams({ video_path })}`
+        .get<Awaited<api_vid_track_pids_t>>(
+          `/vid/${encodeURIComponent(video_path)}/track/person-ids`
         )
         .then(res => res.data)
 
@@ -73,34 +73,88 @@ export const api_track_people_count = ({
 //
 //
 
-export type api_track_history_people_id_range_t = Promise<{
-  person_id: number
-  frame_start_time_sec: number
-  frame_end_time_sec: number
-}>
-
-export const api_track_history_people_id_range = ({
+const url_vid_track_pid_range = ({
   video_path,
   person_id,
 }: {
   video_path: string
   person_id: number
-}): api_track_history_people_id_range_t =>
+}) =>
+  `/vid/${encodeURIComponent(video_path)}/track/person-ids/${encodeURIComponent(
+    person_id
+  )}`
+
+export type api_vid_track_pid_range_get_t = Promise<{
+  person_id: number
+  frame_start_time_sec: number
+  frame_end_time_sec: number
+}>
+
+export const api_vid_track_pid_range_get = ({
+  video_path,
+  person_id,
+}: {
+  video_path: string
+  person_id: number
+}): api_vid_track_pid_range_get_t =>
   import.meta.env.DEV
     ? Promise.resolve({
         person_id,
         frame_start_time_sec: 1.5,
-        frame_end_time_sec: 1.5,
+        frame_end_time_sec: 2.5,
       })
     : axios
-        .get<Awaited<api_track_history_people_id_range_t>>(
-          `/track_history_people_id_range?${new URLSearchParams({
-            video_path,
-            person_id: person_id.toString(),
-          })}`
+        .get<Awaited<api_vid_track_pid_range_get_t>>(
+          url_vid_track_pid_range({ video_path, person_id })
         )
         .then(res => res.data)
 
+//
+//
+//
+
+export type api_vid_track_pid_range_del_t = Promise<void>
+
+export const api_vid_track_pid_range_del = ({
+  video_path,
+  person_id,
+}: {
+  video_path: string
+  person_id: number
+}): api_vid_track_pid_range_del_t =>
+  import.meta.env.DEV
+    ? Promise.resolve()
+    : axios
+        .delete<Awaited<api_vid_track_pid_range_del_t>>(
+          url_vid_track_pid_range({ video_path, person_id })
+        )
+        .then(res => res.data)
+
+//
+//
+//
+
+export type api_vid_track_pid_range_merge_t = Promise<void>
+
+export async function api_vid_track_pid_range_merge({
+  video_path,
+  person_ids,
+}: {
+  video_path: string
+  person_ids: number[]
+}): api_vid_track_pid_range_merge_t {
+  if (import.meta.env.DEV) return Promise.resolve()
+  if (person_ids.length < 2)
+    throw new Error(`person_ids.length<2 (${person_ids})`)
+
+  const res = await axios.put<Awaited<api_vid_track_pid_range_merge_t>>(
+    url_vid_track_pid_range({ video_path, person_id: person_ids[0] }),
+    {
+      merge_with: person_ids.slice(1),
+    }
+  )
+  return res.data
+}
 //
 //
 //

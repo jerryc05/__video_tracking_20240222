@@ -6,9 +6,9 @@ import { Card, CardHeader, CardTitle, CardContent } from './components/ui/card'
 import {
   VidPath,
   api_start_processing,
-  api_track_history_people_id_range,
-  api_track_history_people_id_range_t,
-  api_track_people_count,
+  api_vid_track_pid_range_get,
+  api_vid_track_pid_range_get_t,
+  api_vid_track_pids,
   api_upload_config,
   api_vid_track_screenshots,
   get_file_url_by_path,
@@ -65,7 +65,7 @@ function UploadConfig() {
   const [configFileS, setConfigFileS] = createSignal<File>()
   const [vidPathsS, setVidPathsS] = createSignal<VidPath[]>()
   const [personIdRangeS, setPersonIdRange] =
-    createSignal<Awaited<api_track_history_people_id_range_t>>()
+    createSignal<Awaited<api_vid_track_pid_range_get_t>>()
 
   return (
     <Card class='mx-auto my-5'>
@@ -154,7 +154,7 @@ function UploadConfig() {
                   onClick={() => {
                     const vidPathInfo = selectedVidInfoS()
                     vidPathInfo &&
-                      api_track_people_count({
+                      api_vid_track_pids({
                         video_path: vidPathInfo.vidPath.path,
                       }).then(res => {
                         setSelectedVidInfoS({
@@ -185,7 +185,7 @@ function UploadConfig() {
                       selectedVidinfo.selectedPersonId = person_id
                       setSelectedVidInfoS({ ...selectedVidinfo })
 
-                      api_track_history_people_id_range({
+                      api_vid_track_pid_range_get({
                         video_path: selectedVidinfo.vidPath.path,
                         person_id,
                       }).then(res => {
