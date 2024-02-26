@@ -13,6 +13,7 @@ import {
   api_vid_track_pid_t,
   get_file_url_by_path,
   api_vid_track_pid_del,
+  api_vid_track_pid_range_merge,
 } from '@/api'
 import {
   RadioGroup,
@@ -20,6 +21,15 @@ import {
   RadioGroupItemLabel,
 } from '@/components/ui/radio-group'
 import { sec_to_hms } from './utils'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from './components/ui/dialog'
 
 export const [selectedVidInfoS, setSelectedVidInfoS] = createSignal<{
   vidPath: VidPath
@@ -27,6 +37,9 @@ export const [selectedVidInfoS, setSelectedVidInfoS] = createSignal<{
   pids?: Awaited<api_vid_track_pid_list_t>['person_ids']
   selectedPerson?: { pid: number; info?: Awaited<api_vid_track_pid_t> }
 }>()
+
+const CSS_CLASS_PID_BTN = 'w-12 m-1 border-[1px]'
+
 //
 //
 //
@@ -184,7 +197,7 @@ function UploadConfig() {
                       ? 'default'
                       : 'outline'
                   }
-                  class='w-12 mx-1 border-[1px]'
+                  class={CSS_CLASS_PID_BTN}
                   onClick={() => {
                     const selectedVidinfo = selectedVidInfoS()
                     if (selectedVidinfo) {
@@ -222,16 +235,18 @@ function UploadConfig() {
 
 function PersonInfo() {
   const selectedVidInfo = selectedVidInfoS()
+  const pids = selectedVidInfo?.pids
   const info = selectedVidInfo?.selectedPerson?.info
 
   if (selectedVidInfo != null && info != null)
     return (
       <div>
+        <div class='h-4' />
         <div class='flex items-center gap-x-2'>
-          <div class='font-bold text-xl'>Person </div>
-          <div class='font-bold text-3xl'>{info.person_id}</div>
+          <div class='font-bold text-xl'> Person </div>
+          <div class='font-bold text-3xl'>🙋{info.person_id}</div>
           <div class='flex-grow text-center'>
-            {sec_to_hms(info.frame_start_time_sec)} to{' '}
+            🎬 {sec_to_hms(info.frame_start_time_sec)} to 🎬{' '}
             {sec_to_hms(info.frame_end_time_sec)}
           </div>
           <Button
@@ -249,6 +264,13 @@ function PersonInfo() {
           >
             Play Clip
           </Button>
+          {pids != null && (
+            <PersonInfoMerge
+              video_path={selectedVidInfo.vidPath.path}
+              person_id={info.person_id}
+              pids={pids}
+            />
+          )}
           <Button
             variant='destructive'
             onClick={() => {
@@ -276,6 +298,75 @@ function PersonInfo() {
         </div>
       </div>
     )
+}
+
+function PersonInfoMerge({
+  video_path,
+  person_id,
+  pids,
+}: {
+  video_path: string
+  person_id: number
+  pids: number[]
+}) {
+  const [open, setOpen] = createSignal(false)
+  const [mergeWithPidsS, setMergeWithPidsS] = createSignal<number[]>([])
+  return (
+    <Dialog open={open()} onOpenChange={setOpen}>
+      <DialogTrigger>
+        <Button variant='secondary'>Merge</Button>
+      </DialogTrigger>
+      <DialogContent class='max-w-[90%]'>
+        <DialogHeader>
+          <DialogTitle>Merge 🙋{person_id} with Others</DialogTitle>
+          <DialogDescription>
+            Choose multiple person ids to merge with.
+          </DialogDescription>
+        </DialogHeader>
+        <div class='flex flex-wrap'>
+          {pids
+            .filter(pid => pid !== person_id)
+            .map(pid => (
+              <Button
+                class={CSS_CLASS_PID_BTN}
+                variant={mergeWithPidsS().includes(pid) ? 'default' : 'outline'}
+                onClick={() => {
+                  const mergeWithPids = mergeWithPidsS()
+                  if (mergeWithPids.includes(pid))
+                    setMergeWithPidsS(mergeWithPids.filter(p => p !== pid))
+                  else setMergeWithPidsS([...mergeWithPids, pid])
+                }}
+              >
+                {pid}
+              </Button>
+            ))}
+        </div>
+        <DialogFooter>
+          <Button
+            onClick={e => {
+              const btn = e.target as HTMLButtonElement
+              btn.disabled = true
+
+              api_vid_track_pid_range_merge({
+                video_path,
+                person_id,
+                person_ids_dst: mergeWithPidsS(),
+              })
+                .then(() => {
+                  setOpen(false)
+                })
+                .finally(() => {
+                  btn.disabled = false
+                })
+            }}
+            disabled={mergeWithPidsS().length === 0}
+          >
+            Merge {mergeWithPidsS().length} Selected
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
 }
 
 const ShowVideo = () => {

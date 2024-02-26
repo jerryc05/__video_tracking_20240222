@@ -152,19 +152,21 @@ export type api_vid_track_pid_range_merge_t = Promise<void>
 
 export async function api_vid_track_pid_range_merge({
   video_path,
-  person_ids,
+  person_id,
+  person_ids_dst,
 }: {
   video_path: string
-  person_ids: number[]
+  person_id: number
+  person_ids_dst: number[]
 }): api_vid_track_pid_range_merge_t {
-  if (import.meta.env.DEV) return Promise.resolve()
-  if (person_ids.length < 2)
-    throw new Error(`person_ids.length<2 (${person_ids})`)
+  person_ids_dst = person_ids_dst.filter(id => id !== person_id)
+  if (import.meta.env.DEV || person_ids_dst.length === 0)
+    return Promise.resolve()
 
   const res = await axios.put<Awaited<api_vid_track_pid_range_merge_t>>(
-    url_vid_track_pid({ video_path, person_id: person_ids[0] }),
+    url_vid_track_pid({ video_path, person_id }),
     {
-      merge_with: person_ids.slice(1),
+      merge_with: person_ids_dst,
     }
   )
   return res.data
