@@ -225,7 +225,9 @@ function UploadConfig() {
                 </Button>
               )
             })}
-            {selectedVidInfoS()?.selectedPerson?.info && <PersonInfo />}
+            {selectedVidInfoS()?.selectedPerson?.info && (
+              <PersonInfo selectedVidInfo={selectedVidInfoS()} />
+            )}
           </div>
         )}
       </CardContent>
@@ -233,8 +235,11 @@ function UploadConfig() {
   )
 }
 
-function PersonInfo() {
-  const selectedVidInfo = selectedVidInfoS()
+function PersonInfo({
+  selectedVidInfo,
+}: {
+  selectedVidInfo: ReturnType<typeof selectedVidInfoS>
+}) {
   const pids = selectedVidInfo?.pids
   const info = selectedVidInfo?.selectedPerson?.info
 
@@ -244,7 +249,7 @@ function PersonInfo() {
         <div class='h-4' />
         <div class='flex items-center gap-x-2'>
           <div class='font-bold text-xl'> Person </div>
-          <div class='font-bold text-3xl'>🙋{info.person_id}</div>
+          <div class='font-bold text-3xl'>#{info.person_id}</div>
           <div class='flex-grow text-center'>
             🎬 {sec_to_hms(info.frame_start_time_sec)} to 🎬{' '}
             {sec_to_hms(info.frame_end_time_sec)}
@@ -292,7 +297,7 @@ function PersonInfo() {
           </Button>
         </div>
         <div class='flex gap-x-1 items-center overflow-y-auto [&>img]:max-h-52'>
-          {selectedVidInfoS()?.selectedPerson?.info?.scrshot_paths.map(path => (
+          {selectedVidInfo.selectedPerson?.info?.scrshot_paths.map(path => (
             <img src={get_file_url_by_path(path)} alt={path} />
           ))}
         </div>
@@ -372,8 +377,6 @@ function PersonInfoMerge({
 const ShowVideo = () => {
   const [timestamp, setTimestamp] = createSignal(0)
   let videoEl: HTMLVideoElement | undefined
-  const selectedVidInfo = selectedVidInfoS()
-  if (!selectedVidInfo) return null
   return (
     <Card>
       <CardHeader>
@@ -382,7 +385,7 @@ const ShowVideo = () => {
       <CardContent class='flex flex-col gap-y-3'>
         {/* biome-ignore lint/a11y/useMediaCaption: <explanation> */}
         <video ref={videoEl} controls preload='metadata' />
-        <div class='flex gap-x-2'>
+        {/* <div class='flex gap-x-2'>
           <label class='flex-grow flex gap-x-2'>
             <div class='flex-shrink-0 flex items-center'>Jump to second:</div>
             <Input
@@ -402,7 +405,7 @@ const ShowVideo = () => {
           >
             Jump
           </Button>
-        </div>
+        </div> */}
       </CardContent>
     </Card>
   )
