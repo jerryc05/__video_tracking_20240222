@@ -27,4 +27,4 @@
 }
 ```
 
-意思是 `merge_with` 里的所有 id 全部合并到 url 里的那个 person_id，然后 `merge_with` 里的所有 id 应该消失
+意思是 `merge_with` 里的所有 id 全部合并到 url 里的那个 `person_id`，然后 `merge_with` 里的所有 id 应该消失
