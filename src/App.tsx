@@ -33,17 +33,23 @@ const [selectedVidInfoS, setSelectedVidInfoS] = createSignal<{
   selectedPerson?: { pid: number; info?: Awaited<api_vid_track_pid_t> }
 }>()
 
-let video: HTMLVideoElement | undefined
+let videoEl: HTMLVideoElement | undefined
 
 export const App = () => {
   return (
     <ErrorBoundary
-      fallback={err => (
-        <>
-          <h1>Error</h1>
-          <div class='text-3xl'>{err}</div>
-        </>
-      )}
+      fallback={(err, reset) => {
+        let msg = err
+        if (err instanceof Error) msg = `${err.stack}\n${err.cause ?? ''}`
+        else if (err.toString) msg = err.toString()
+        return (
+          <div class='text-center'>
+            <h1 class='font-bold text-5xl'>Error</h1>
+            <pre class='text-left'>{msg}</pre>
+            <Button onClick={reset}>Reset</Button>
+          </div>
+        )
+      }}
     >
       <div class='mx-[5%]'>
         <UploadConfig />
@@ -210,13 +216,13 @@ function UploadConfig() {
                   <Button
                     variant='outline'
                     onClick={() => {
-                      if (video) {
-                        video.src = `${get_file_url_by_path(
+                      if (videoEl) {
+                        videoEl.src = `${get_file_url_by_path(
                           selectedVidInfo.vidPath.path
                         )}#t=${personIdRange.frame_start_time_sec},${
                           personIdRange.frame_end_time_sec
                         }`
-                        video.play()
+                        videoEl.play()
                       }
                     }}
                   >
@@ -250,7 +256,7 @@ const ShowVideo = () => {
       </CardHeader>
       <CardContent class='flex flex-col gap-y-3'>
         {/* biome-ignore lint/a11y/useMediaCaption: <explanation> */}
-        <video ref={video} controls preload='metadata' />
+        <video ref={videoEl} controls preload='metadata' />
         <div class='flex gap-x-2'>
           <label class='flex-grow flex gap-x-2'>
             <div class='flex-shrink-0 flex items-center'>Jump to second:</div>
@@ -264,8 +270,8 @@ const ShowVideo = () => {
           <Button
             type='button'
             onClick={() => {
-              if (video) {
-                video.currentTime = timestamp()
+              if (videoEl) {
+                videoEl.currentTime = timestamp()
               }
             }}
           >
