@@ -1,4 +1,4 @@
-1）原来的 track people count 现在是 `GET /vid/{vid_path}/person-ids`，返回类型
+1）`GET /vid/{vid_path}/person-ids`
 
 ```ts
 {
@@ -6,7 +6,7 @@
 }
 ```
 
-2）原来的 track history people id range 和 screenshot 合并成 `GET /vid/{vid_path}/person-ids/{person_id}`，返回类型
+2）`GET /vid/{vid_path}/person-ids/{person_id}`
 
 ```ts
 {
@@ -14,12 +14,13 @@
   frame_start_time_sec: number
   frame_end_time_sec: number
   scrshot_paths: string[]
+  trace_img: string
 }
 ```
 
-3）新的 `DELETE /vid/{vid_path}/person-ids/{person_id}` 成功返回 HTTP 2xx
+3）新的 `DELETE /vid/{vid_path}/person-ids/{person_id}`，返回好好好
 
-4）新的 `PUT /vid/{vid_path}/person-ids/{person_id}` 有个 json body
+4）新的 `PUT /vid/{vid_path}/person-ids/{person_id}`，有个 json body
 
 ```ts
 {
@@ -27,4 +28,6 @@
 }
 ```
 
-意思是 `merge_with` 里的所有 id 全部合并到 url 里的那个 `person_id`，然后 `merge_with` 里的所有 id 应该消失
+意思是 `merge_with` 里的所有 id 全部合并到 url 里的那个 `person_id`，然后 `merge_with` 里的所有 id 应该消失，返回好好好
+
+5）`GET /vid/{vid_path}/person-ids/{person_id}/trace`，返回一张图片

@@ -61,16 +61,27 @@ export const api_start_processing = ({
 //
 //
 
-const url_vid_track_person_ids = ({ video_path }: { video_path: string }) =>
-  `/vid/${encodeURIComponent(video_path)}/person-ids`
+const url_vid = ({ video_path }: { video_path: string }) =>
+  `/vid/${encodeURIComponent(video_path)}`
 
-const url_vid_track_pid = ({
+const url_vid_track_pids_list = ({ video_path }: { video_path: string }) =>
+  `${url_vid({ video_path })}/person-ids`
+
+const url_vid_track_pid_get = ({
   video_path,
   person_id,
 }: {
   video_path: string
   person_id: number
-}) => `${url_vid_track_person_ids({ video_path })}/${person_id}`
+}) => `${url_vid_track_pids_list({ video_path })}/${person_id}`
+
+const url_vid_track_pid_trace_get = ({
+  video_path,
+  person_id,
+}: {
+  video_path: string
+  person_id: number
+}) => `${url_vid_track_pid_get({ video_path, person_id })}/trace`
 
 //
 //
@@ -93,7 +104,7 @@ export const api_vid_track_pid_list = ({
       })
     : axios
         .get<Awaited<api_vid_track_pid_list_t>>(
-          url_vid_track_person_ids({ video_path })
+          url_vid_track_pids_list({ video_path })
         )
         .then(res => res.data)
 
@@ -130,7 +141,7 @@ export const api_vid_track_pid = ({
       })
     : axios
         .get<Awaited<api_vid_track_pid_t>>(
-          url_vid_track_pid({ video_path, person_id })
+          url_vid_track_pid_get({ video_path, person_id })
         )
         .then(res => res.data)
 
@@ -151,7 +162,7 @@ export const api_vid_track_pid_del = ({
     ? Promise.resolve()
     : axios
         .delete<Awaited<api_vid_track_pid_del_t>>(
-          url_vid_track_pid({ video_path, person_id })
+          url_vid_track_pid_get({ video_path, person_id })
         )
         .then(res => res.data)
 
@@ -175,7 +186,7 @@ export async function api_vid_track_pid_range_merge({
     return Promise.resolve()
 
   const res = await axios.put<Awaited<api_vid_track_pid_range_merge_t>>(
-    url_vid_track_pid({ video_path, person_id }),
+    url_vid_track_pid_get({ video_path, person_id }),
     {
       merge_with: person_ids_dst,
     }

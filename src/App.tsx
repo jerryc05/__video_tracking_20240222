@@ -274,6 +274,7 @@ function PersonInfo({
               video_path={selectedVidInfo.vidPath.path}
               person_id={info.person_id}
               pids={pids}
+              setSelectedVidInfoS_={setSelectedVidInfoS}
             />
           )}
           <Button
@@ -309,10 +310,12 @@ function PersonInfoMerge({
   video_path,
   person_id,
   pids,
+  setSelectedVidInfoS_,
 }: {
   video_path: string
   person_id: number
   pids: number[]
+  setSelectedVidInfoS_: typeof setSelectedVidInfoS
 }) {
   const [open, setOpen] = createSignal(false)
   const [mergeWithPidsS, setMergeWithPidsS] = createSignal<number[]>([])
@@ -356,13 +359,23 @@ function PersonInfoMerge({
                 video_path,
                 person_id,
                 person_ids_dst: mergeWithPidsS(),
-              })
-                .then(() => {
+              }).finally(() => {
+                //
+                api_vid_track_pid_list({
+                  video_path,
+                }).then(res => {
+                  setSelectedVidInfoS_(info => {
+                    if (info)
+                      return {
+                        ...info,
+                        pids: res.person_ids,
+                      }
+                  })
+
+                  btn.disabled = false
                   setOpen(false)
                 })
-                .finally(() => {
-                  btn.disabled = false
-                })
+              })
             }}
             disabled={mergeWithPidsS().length === 0}
           >
