@@ -53,8 +53,28 @@ export const api_start_processing = ({
 //
 //
 
+//
+//
+//
+
+//
+//
+//
+
 const url_vid_track_person_ids = ({ video_path }: { video_path: string }) =>
   `/vid/${encodeURIComponent(video_path)}/person-ids`
+
+const url_vid_track_pid = ({
+  video_path,
+  person_id,
+}: {
+  video_path: string
+  person_id: number
+}) => `${url_vid_track_person_ids({ video_path })}/${person_id}`
+
+//
+//
+//
 
 export type api_vid_track_pid_list_t = Promise<{
   person_ids: number[]
@@ -80,15 +100,6 @@ export const api_vid_track_pid_list = ({
 //
 //
 //
-
-const url_vid_track_pid = ({
-  video_path,
-  person_id,
-}: {
-  video_path: string
-  person_id: number
-}) =>
-  `${url_vid_track_person_ids({ video_path })}/${encodeURIComponent(person_id)}`
 
 export type api_vid_track_pid_t = Promise<{
   person_id: number
