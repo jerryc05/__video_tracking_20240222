@@ -1,4 +1,4 @@
-1）原来的 track people count 现在是 `GET /vid/{vid_path}/track/person-ids`，返回类型
+1）原来的 track people count 现在是 `GET /vid/{vid_path}/person-ids`，返回类型
 
 ```ts
 {
@@ -6,7 +6,7 @@
 }
 ```
 
-2）原来的 track history people id range 和 screenshot 合并成 `GET /vid/{vid_path}/track/person-ids/{person_id}`，返回类型
+2）原来的 track history people id range 和 screenshot 合并成 `GET /vid/{vid_path}/person-ids/{person_id}`，返回类型
 
 ```ts
 {
@@ -17,9 +17,9 @@
 }
 ```
 
-3）新的 `DELETE /vid/{vid_path}/track/person-ids/{person_id}` 成功返回 HTTP 2xx
+3）新的 `DELETE /vid/{vid_path}/person-ids/{person_id}` 成功返回 HTTP 2xx
 
-4）新的 `PUT /vid/{vid_path}/track/person-ids/{person_id}` 有个 json body
+4）新的 `PUT /vid/{vid_path}/person-ids/{person_id}` 有个 json body
 
 ```ts
 {
