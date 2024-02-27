@@ -14,6 +14,7 @@ import {
   get_file_url_by_path,
   api_vid_track_pid_del,
   api_vid_track_pid_range_merge,
+  url_vid_track_pid_trace_get,
 } from '@/api'
 import {
   RadioGroup,
@@ -167,7 +168,6 @@ function UploadConfig() {
               {selectedVidInfoS() && (
                 <Button
                   class='flex-1'
-                  type='button'
                   onClick={() => {
                     const vidPathInfo = selectedVidInfoS()
                     vidPathInfo &&
@@ -242,6 +242,7 @@ function PersonInfo({
 }) {
   const pids = selectedVidInfo?.pids
   const info = selectedVidInfo?.selectedPerson?.info
+  const [traceImg, setTraceImg] = createSignal(false)
 
   if (selectedVidInfo != null && info != null)
     return (
@@ -278,6 +279,14 @@ function PersonInfo({
             />
           )}
           <Button
+            variant='outline'
+            onClick={() => {
+              setTraceImg(x => !x)
+            }}
+          >
+            {traceImg() ? 'Hide' : 'Show'} Trace
+          </Button>
+          <Button
             variant='destructive'
             onClick={() => {
               api_vid_track_pid_del({
@@ -297,11 +306,21 @@ function PersonInfo({
             Delete
           </Button>
         </div>
-        <div class='flex gap-x-1 items-center overflow-y-auto [&>img]:max-h-52'>
+        <div class='mt-1 flex gap-x-1 items-center overflow-y-auto [&>img]:max-h-52'>
           {selectedVidInfo.selectedPerson?.info?.scrshot_paths.map(path => (
             <img src={get_file_url_by_path(path)} alt={path} />
           ))}
         </div>
+        {traceImg() && (
+          <img
+            class='mt-1 w-full'
+            src={url_vid_track_pid_trace_get({
+              video_path: selectedVidInfo.vidPath.path,
+              person_id: info.person_id,
+            })}
+            alt='trace'
+          />
+        )}
       </div>
     )
 }

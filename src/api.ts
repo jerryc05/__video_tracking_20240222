@@ -75,7 +75,7 @@ const url_vid_track_pid_get = ({
   person_id: number
 }) => `${url_vid_track_pids_list({ video_path })}/${person_id}`
 
-const url_vid_track_pid_trace_get = ({
+export const url_vid_track_pid_trace_get = ({
   video_path,
   person_id,
 }: {
